@@ -1,4 +1,6 @@
+import 'package:chat_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:chat_app/models/usuario.dart';
@@ -12,7 +14,7 @@ class UsuariosPage extends StatefulWidget {
 
 class _UsuariosPageState extends State<UsuariosPage> {
 
-  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   final usuarios = [
     Usuario(uid: '1', nombre: 'María', email: 'test@test.com', online: true),
@@ -22,14 +24,23 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+    final usuario = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mi nombre", style: TextStyle(color: Colors.black87)),
+        title: Text(usuario.nombre.toString(), style: const TextStyle(color: Colors.black87)),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.exit_to_app, color: Colors.black87,),
-          onPressed: () {}
+          onPressed: () {
+            //TODO: Deconectar del socket
+
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthService.deleteToken();
+          }
         ),
         actions: [
           Container(
@@ -56,7 +67,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       itemBuilder: (_, i) => _usuarioListTile(usuarios[i]), 
-      separatorBuilder: (context, index) => Divider(), 
+      separatorBuilder: (context, index) => const Divider(), 
       itemCount: usuarios.length
     );
   }
@@ -81,7 +92,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
   }
 
   _cargarUsuarios() async {
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     _refreshController.refreshCompleted();
   }
 }

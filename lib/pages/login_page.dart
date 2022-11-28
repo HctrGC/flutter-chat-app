@@ -1,8 +1,11 @@
+import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/blue_button.dart';
 import 'package:chat_app/widgets/custom_input.dart';
 import 'package:chat_app/widgets/labels.dart';
 import 'package:chat_app/widgets/logo.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -54,6 +57,9 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -75,8 +81,14 @@ class __FormState extends State<_Form> {
           ),
 
           BlueButton(
-            onPressed: () {
-
+            onPressed: authService.autenticando ? null : () async {
+              FocusScope.of(context).unfocus();
+              final login = await authService.login(emailCtrl.text.trim(), pwdCtrl.text.trim());
+              if (login) {
+                Navigator.pushReplacementNamed(context, 'users');
+              } else {
+                mostrarAlerta(context, 'Login incorrecto', 'Credenciales incorrectas');
+              }
             },
             text: 'Ingresar'
           )
